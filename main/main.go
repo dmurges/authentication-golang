@@ -4,7 +4,9 @@ import (
 	. "authentication-service/config"
 	"authentication-service/controllers"
 	"authentication-service/dao"
+	"authentication-service/middlewares"
 	"github.com/gorilla/mux"
+	"github.com/urfave/negroni"
 	"log"
 	"net/http"
 )
@@ -29,9 +31,10 @@ func main() {
 	router.HandleFunc("/login", controllers.LoginController).Methods("POST")
 	router.HandleFunc("/user", controllers.GetAllUsers).Methods("GET")
 	router.HandleFunc("/user/{id}", controllers.GetUser).Methods("GET")
-	router.HandleFunc("/authenticate", CreateTokenEndpoint).Methods("POST")
-	router.HandleFunc("/protected", ProtectedEndpoint).Methods("GET")
-	router.HandleFunc("/test", ValidateMiddleware(TestEndpoint)).Methods("GET")
+	router.Handle("/resource", negroni.New(
+		negroni.HandlerFunc(middlewares.ValidateMiddleware),
+		negroni.Wrap(http.HandlerFunc(controllers.ProtectedHandler)),
+	))
 
 	if err := http.ListenAndServe("localhost:3000", router); err != nil {
 		log.Fatal(err)

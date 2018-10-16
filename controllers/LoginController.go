@@ -22,6 +22,10 @@ type Token struct {
 	Token 	string    `json:"token"`
 }
 
+type Response struct {
+	Data	string	`json:"data"`
+}
+
 
 func LoginController(w http.ResponseWriter, r *http.Request) {
 	var credentials Credentials
@@ -57,7 +61,12 @@ func LoginController(w http.ResponseWriter, r *http.Request) {
 	}
 	response := Token{token}
 	JsonResponse(response, w)
+}
 
+func ProtectedHandler(w http.ResponseWriter, r *http.Request){
+
+	response := Response{"Gained access to protected resource"}
+	JsonResponse(response, w)
 
 }
 
@@ -70,6 +79,7 @@ func comparePasswords(hashedPwd string, plainPwd []byte) bool {
 	}
 	return true
 }
+
 
 func JsonResponse(response interface{}, w http.ResponseWriter) {
 
